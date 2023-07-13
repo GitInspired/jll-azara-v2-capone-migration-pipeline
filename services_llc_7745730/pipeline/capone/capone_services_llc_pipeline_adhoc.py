@@ -1,4 +1,3 @@
-# Databricks notebook source
-spark.sql(""" 
+spark.sql("""  
 select current_date()         
 """)
