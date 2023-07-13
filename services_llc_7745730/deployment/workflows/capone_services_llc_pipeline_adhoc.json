@@ -10,7 +10,7 @@
         }
     ],    
     "settings": {
-        "name": "bofa_pipeline_ad_hoc",
+        "name": "capone_services_llc_pipeline_ad_hoc",
         "email_notifications": {
             "on_start": [
             ],
@@ -32,7 +32,7 @@
             {
                 "task_key": "bofa_ad_hoc",
                 "notebook_task": {
-                    "notebook_path": "/jll-azara-0007745730-capitalone/adhoc",
+                    "notebook_path": "/jll-azara-0007745730-capitalone/capone_services_llc_pipeline_adhoc",
                     "source": "WORKSPACE"
                 },
                 "existing_cluster_id": "0615-163707-4qlmiya2",
@@ -41,7 +41,7 @@
             }
         ],
         "tags": {
-            "client_id": "7642176"
+            "client_id": "7745730"
         },
         "format": "MULTI_TASK"
     },
