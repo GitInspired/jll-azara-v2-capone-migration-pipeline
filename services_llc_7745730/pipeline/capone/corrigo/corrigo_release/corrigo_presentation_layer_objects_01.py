@@ -85,8 +85,10 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
                     ,r_woActivityLogs.effective_at			 as datetime
                     ,r_woActivityLogs.action				 as action
                     ,r_woActivityLogs.comment 				 as comments
-                    , CASE WHEN performed_by='PMRM Module' AND actor_type_name='Company' THEN 4
+                    , CASE WHEN performed_by ='PMRM Module' AND actor_type_name='Company' THEN 4
                          WHEN performed_by='CorrigoNet' AND actor_type_name='Company' THEN 1
+                         WHEN performed_by='Scheduler' AND actor_type_name='Company' THEN 8
+                         WHEN performed_by='Integration API User' AND actor_type_name='Company' THEN 13
                          ELSE coalesce(r_woActivityLogs.employee_id,r_woActivityLogs.service_provider_id,r_woActivityLogs.contact_id)
                     END AS performed_by_id
 	                ,dv_employees.role 						 as performed_by_role
