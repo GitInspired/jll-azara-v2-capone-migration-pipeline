@@ -157,7 +157,7 @@ where trim(c.company) in ('00063','02456','25521','44011','44012','44014','44015
 
 # DBTITLE 1,ssdv_vw_ovf_financial_workorderinvoice
 spark.sql("""
-create or replace view jll_azara_catalog.jll_azara_0007745730_capitalone_custom.vw_ssdv_vw_ovf_financial_workorderinvoice AS
+create or replace view jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_ovf_financial_workorderinvoice AS
 with _final as (
 SELECT
  f1.RPKCO                               AS Client_Nbr
