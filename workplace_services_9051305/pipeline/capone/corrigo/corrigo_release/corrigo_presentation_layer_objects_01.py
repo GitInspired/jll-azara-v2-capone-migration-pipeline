@@ -39,6 +39,11 @@ refresh_date = datetime.datetime.strptime(jobRunDate, '%Y-%m-%d %H:%M:%S.%f%z')
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiCustomers
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiCustomers
                 AS
                 select  
@@ -73,6 +78,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiC
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiWorkOrderActivityLog
+'''
+
+Version: 2, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiWorkOrderActivityLog
                 AS
                 SELECT DISTINCT
@@ -85,14 +95,15 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
                     ,r_woActivityLogs.effective_at			 as datetime
                     ,r_woActivityLogs.action				 as action
                     ,r_woActivityLogs.comment 				 as comments
-                    , CASE WHEN performed_by='PMRM Module' AND actor_type_name='Company' THEN 4
+                    , CASE WHEN performed_by ='PMRM Module' AND actor_type_name='Company' THEN 4
                          WHEN performed_by='CorrigoNet' AND actor_type_name='Company' THEN 1
+                         WHEN performed_by='Scheduler' AND actor_type_name='Company' THEN 8
+                         WHEN performed_by='Integration API User' AND actor_type_name='Company' THEN 13
                          ELSE coalesce(r_woActivityLogs.employee_id,r_woActivityLogs.service_provider_id,r_woActivityLogs.contact_id)
                     END AS performed_by_id
 	                ,dv_employees.role 						 as performed_by_role
                     ,case when actor_type_name='User' then 'JLL' else actor_type_name end  as performed_by_user_type
                     ,r_woActivityLogs.reason 				 as reason
-                    ,''                                      as DWH_Last_Updated_At
                     ,CAST('{refresh_date}' as TIMESTAMP)                        as UpdateDate
                     ,work_order_activity_log_id              as Log_ID
                 FROM {var_client_custom_db}.raw_work_order_activity_logs_wo_activitylogs_corrigo r_woActivityLogs
@@ -105,6 +116,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiEquipmentWorkedOn
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiEquipmentWorkedOn
                 AS
                 SELECT DISTINCT
@@ -130,6 +146,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiE
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiAssetAttributes
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiAssetAttributes 
                 AS
                 SELECT  DISTINCT
@@ -147,6 +168,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiA
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiProposals
+'''
+
+Version: 2, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiProposals
                 AS
                 (
@@ -160,7 +186,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
                             ,last_updated_by
                             ,last_updated_at
                         FROM {var_client_custom_db}.raw_proposal_items_propitems_corrigo
-                        QUALIFY row_number() over(partition by hk_h_proposals order by order_index desc ) = 1   
+                        QUALIFY row_number() over(partition by hk_h_proposals order by order_index desc, last_updated_at desc ) = 1   
                     ) 
                 SELECT DISTINCT
                      h_masterClientsTen.client_name   as Client_Name
@@ -190,6 +216,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiWorkZones
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiWorkZones
                 AS
                 SELECT DISTINCT
@@ -225,6 +256,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiAssetRefrigerantLog
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiAssetRefrigerantLog
                     AS
                         SELECT DISTINCT
@@ -268,6 +304,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiA
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiPMRMWorkOrders
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiPMRMWorkOrders
                     AS
                         SELECT  DISTINCT
@@ -291,6 +332,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiServiceProviders
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiServiceProviders
           AS
            With _WO AS (
@@ -351,12 +397,18 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiS
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiServiceProviderPriceLists
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+Version: 2, Creation Date: 24/07/2023, Modified By: Varun Kancharla
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiServiceProviderPriceLists
           AS
             With _providers as 
             (
               Select distinct 
                     service_provider_id, 
+                    full_name,
                     case when lower(is_removed)='true' then 'Yes' else 'No' end as provider_is_deleted
               from {var_client_custom_db}.raw_service_providers_serviceproviders_corrigo
             )  
@@ -364,7 +416,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiS
                 client_name, 
                 client_id as company_id, 
                 raw_rates.service_provider_id, 
-                price_list_name as service_provider_name,
+                full_name as service_provider_name,
                 item_name, 
                 item_description, 
                 cost_category as category, 
@@ -380,6 +432,11 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiS
 # COMMAND ----------
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiServiceProviderInsurance
+'''
+
+Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+
+'''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiServiceProviderInsurance
           AS
             With expired_status as 
