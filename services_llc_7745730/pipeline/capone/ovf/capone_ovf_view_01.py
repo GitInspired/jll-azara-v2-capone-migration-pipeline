@@ -197,6 +197,6 @@ from _final
 
 # COMMAND ----------
 
-spark.sql("""drop view  jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_ovf_financial_workorderinvoice  """)
+# spark.sql("""drop view  jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_ovf_financial_workorderinvoice  """)
 # spark.sql("""drop view  jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_ovf_tm1_detailanalysiscube  """)
 # spark.sql("""drop view  jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_ovf_commitmentdetail  """)
