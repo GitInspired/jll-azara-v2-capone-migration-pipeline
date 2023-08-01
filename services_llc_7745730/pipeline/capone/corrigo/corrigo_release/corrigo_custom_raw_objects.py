@@ -103,7 +103,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_locations_locati
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_asset_attributes_assetattr_corrigo
                 AS 
                 SELECT 
-                    haa.tenant_id, haa.asset_attribute_id, haa.source_id, haa.dss_record_source as h_dss_record_source, haa.dss_load_date as h_dss_load_date, haa.dss_create_time as h_dss_create_time,             
+                    haa.tenant_id, haa.asset_id, haa.property_id, haa.source_id, haa.dss_record_source as h_dss_record_source, haa.dss_load_date as h_dss_load_date, haa.dss_create_time as h_dss_create_time,             
                     lac.hk_l_assets_assetattributes, lac.hk_h_assets, lac.dss_record_source as l_dss_record_source, lac.dss_load_date as l_dss_load_date, lac.dss_create_time as l_dss_create_time,
                     caa.*  
                 FROM {var_client_raw_db}.s_asset_attributes_assetattr_corrigo_current  caa
@@ -292,7 +292,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_rates_svcprovrat
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_schedule_events_schedevents_corrigo
                 AS 
                 SELECT 
-                    hse.tenant_id, hse.schedule_event_id, hse.source_id, hse.dss_record_source as h_dss_record_source, hse.dss_load_date as h_dss_load_date, hse.dss_create_time as h_dss_create_time,
+                    hse.tenant_id, hse.schedule_id, hse.order_index, hse.source_id, hse.dss_record_source as h_dss_record_source, hse.dss_load_date as h_dss_load_date, hse.dss_create_time as h_dss_create_time,
                     ssec.*  
                 FROM {var_client_raw_db}.s_schedule_events_schedevents_corrigo_current ssec
                 LEFT JOIN {var_azara_raw_db}.h_schedule_events                         hse
@@ -539,10 +539,6 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_master_propertie
 
 # COMMAND ----------
 
-# MAGIC %md
-
-# COMMAND ----------
-
 # DBTITLE 1,raw_incident_activity_logs_incidents_corrigo
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_incident_activity_logs_incidents_corrigo
                 AS 
@@ -624,7 +620,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_work_order_tasks
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_responsibilities_resp_corrigo
                 AS 
                 SELECT
-                    hr.tenant_id, hr.responsibility_id, hr.responsibility_type_id, hr.source_id, hr.dss_record_source as h_dss_record_source, hr.dss_load_date as h_dss_load_date, hr.dss_create_time as h_dss_create_time,
+                    hr.tenant_id, hr.responsibility_type_id, hr.area_id, hr.area_type_id, hr.source_id, hr.dss_record_source as h_dss_record_source, hr.dss_load_date as h_dss_load_date, hr.dss_create_time as h_dss_create_time,
                     sr.*
                 FROM {var_client_raw_db}.s_responsibilities_resp_corrigo_current   sr
                 LEFT JOIN {var_azara_raw_db}.h_responsibilities                    hr
@@ -775,6 +771,22 @@ spark.sql(""" CREATE OR REPLACE  VIEW {var_client_custom_db}.raw_schedule_costs_
                            ON ssc.hk_h_schedule_costs = hs.hk_h_schedule_costs
                     LEFT JOIN {var_azara_raw_db}.l_schedulecosts_schedules                   lsc
                            ON ssc.hk_h_schedule_costs = lsc.hk_h_schedule_costs """.format(var_azara_raw_db=var_azara_raw_db,var_client_custom_db=var_client_custom_db,var_client_raw_db=var_client_raw_db)) 
+
+# COMMAND ----------
+
+# DBTITLE 1,raw_asset_activity_logs_asset_actlogs_corrigo
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_asset_activity_logs_asset_actlogs_corrigo
+                AS 
+                SELECT 
+					hal.tenant_id, hal.source_id, log_id, asset_id, hal.dss_record_source as h_dss_record_source, hal.dss_load_date as h_dss_load_date, hal.dss_create_time as h_dss_create_time,
+					lal.hk_h_assets, lal.hk_l_assets_asset_activity_logs, lal.dss_record_source as l_dss_record_source, lal.dss_load_date as l_dss_load_date, lal.dss_create_time as l_dss_create_time,
+					sal.*
+				FROM      {var_client_raw_db}.s_asset_activity_logs_asset_actlogs_corrigo_current sal
+				LEFT JOIN {var_azara_raw_db}.h_asset_activity_logs                                hal
+				       ON hal.hk_h_asset_activity_logs= sal.hk_h_asset_activity_logs 
+				LEFT JOIN {var_azara_raw_db}.l_assets_asset_activity_logs                         lal
+					   ON lal.hk_h_asset_activity_logs=sal.hk_h_asset_activity_logs
+				WHERE trim(hal.tenant_id) = "{var_tenant_id}" ; """.format(var_azara_raw_db=var_azara_raw_db,var_client_custom_db=var_client_custom_db, var_client_raw_db=var_client_raw_db, var_tenant_id=var_tenant_id))
 
 # COMMAND ----------
 
