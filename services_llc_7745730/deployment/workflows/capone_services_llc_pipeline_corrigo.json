@@ -9,7 +9,7 @@
             "permission_level": "CAN_MANAGE"
         }
     ],
-    "settings": {
+	"settings": {
         "name": "capone_services_llc_pipeline_corrigo",
         "email_notifications": {
             "no_alert_for_skipped_runs": false
@@ -19,7 +19,7 @@
         "schedule": {
             "quartz_cron_expression": "42 0 11 * * ?",
             "timezone_id": "UTC",
-            "pause_status": "PAUSED"
+            "pause_status": "UNPAUSED"
         },
         "max_concurrent_runs": 1,
         "tasks": [
