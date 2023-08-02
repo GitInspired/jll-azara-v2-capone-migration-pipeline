@@ -213,6 +213,7 @@ df_employees = spark.sql(""" SELECT DISTINCT
                                             then 1
                                         else 0
                                     end as facility_manager_flag
+                                    ,r_employee.score as Score
                                 FROM {var_client_custom_db}.raw_employees_employees_corrigo          r_employee
                                 JOIN {var_client_custom_db}.custom_hv_master_clients_tenants         h_masterClientsTen
                                   ON TRIM(r_employee.source_id) = TRIM(h_masterClientsTen.source_id)
