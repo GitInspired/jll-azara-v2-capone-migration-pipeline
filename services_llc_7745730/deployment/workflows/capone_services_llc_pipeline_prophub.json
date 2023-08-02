@@ -12,10 +12,31 @@
     "settings": {
         "name": "capone_services_llc_pipeline_prophub",
         "email_notifications": {
+            "on_success": [
+                "pradeep.pk@jll.com",
+                "mahanth.chouta@jll.com",
+                "meghan.joyce@jll.com",
+                "prasanta.kumar@jll.com"
+            ],
+            "on_failure": [
+                "pradeep.pk@jll.com",
+                "mahanth.chouta@jll.com",
+                "meghan.joyce@jll.com",
+                "prasanta.kumar@jll.com"
+            ],
             "no_alert_for_skipped_runs": false
         },
         "webhook_notifications": {},
+        "notification_settings": {
+            "no_alert_for_skipped_runs": false,
+            "no_alert_for_canceled_runs": false
+        },
         "timeout_seconds": 0,
+        "schedule": {
+            "quartz_cron_expression": "42 30 17 * * ?",
+            "timezone_id": "Asia/Kolkata",
+            "pause_status": "UNPAUSED"
+        },
         "max_concurrent_runs": 1,
         "tasks": [
             {
@@ -26,22 +47,27 @@
                 },
                 "existing_cluster_id": "0518-082404-whk12x4x",
                 "timeout_seconds": 0,
-                "email_notifications": {
-                    "on_success": [
-                        "pradeep.pk@jll.com",
-                        "mahanth.chouta@jll.com",
-                        "meghan.joyce@jll.com",
-                        "prasanta.kumar@jll.com",
-                        "gaurav.gupta@jll.com"
-                    ],
-                    "on_failure": [
-                        "pradeep.pk@jll.com",
-                        "mahanth.chouta@jll.com",
-                        "meghan.joyce@jll.com",
-                        "prasanta.kumar@jll.com",
-                        "gaurav.gupta@jll.com"
-                    ]
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                }
+            },
+            {
+                "task_key": "services_llc_final_views",
+                "depends_on": [
+                    {
+                        "task_key": "prophub_lake_to_table"
+                    }
+                ],
+                "notebook_task": {
+                    "notebook_path": "/jll-azara-0007745730-capitalone/property_hub/services_llc_final_views",
+                    "source": "WORKSPACE"
                 },
+                "existing_cluster_id": "0518-082404-whk12x4x",
+                "timeout_seconds": 0,
+                "email_notifications": {},
                 "notification_settings": {
                     "no_alert_for_skipped_runs": false,
                     "no_alert_for_canceled_runs": false,
