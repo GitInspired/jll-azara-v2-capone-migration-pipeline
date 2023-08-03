@@ -24,9 +24,9 @@
         "max_concurrent_runs": 1,
         "tasks": [
             {
-                "task_key": "init_pipeline",
+                "task_key": "Init_raw",
                 "notebook_task": {
-                    "notebook_path": "/jll-azara-0009051305-capitalone/corrigo/corrigo_release/init_pipeline",
+                    "notebook_path": "/jll-azara-0009051305-capitalone/corrigo/corrigo_release/corrigo_custom_raw_objects",
                     "source": "WORKSPACE"
                 },
                 "existing_cluster_id": "0518-085716-xi5srukn",
@@ -39,9 +39,9 @@
                 }
             },
             {
-                "task_key": "Init_raw",
+                "task_key": "init_pipeline",
                 "notebook_task": {
-                    "notebook_path": "/jll-azara-0009051305-capitalone/corrigo/corrigo_release/corrigo_custom_raw_objects",
+                    "notebook_path": "/jll-azara-0009051305-capitalone/corrigo/corrigo_release/init_pipeline",
                     "source": "WORKSPACE"
                 },
                 "existing_cluster_id": "0518-085716-xi5srukn",
@@ -128,6 +128,29 @@
                 ],
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0009051305-capitalone/corrigo/corrigo_release/corrigo_presentation_layer_objects_01",
+                    "source": "WORKSPACE"
+                },
+                "existing_cluster_id": "0518-085716-xi5srukn",
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                }
+            },
+            {
+                "task_key": "Presentation_layer_02",
+                "depends_on": [
+                    {
+                        "task_key": "Base_objects_01_creation"
+                    },
+                    {
+                        "task_key": "Base_objects_02_creation"
+                    }
+                ],
+                "notebook_task": {
+                    "notebook_path": "/jll-azara-0009051305-capitalone/corrigo/corrigo_release/corrigo_presentation_layer_objects_02",
                     "source": "WORKSPACE"
                 },
                 "existing_cluster_id": "0518-085716-xi5srukn",
