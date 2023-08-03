@@ -259,6 +259,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
 '''
 
 Version: 1, Creation Date: 21/07/2023, Created By: Vinayak Bhanoo
+Version: 2, Creation Date: 03/08/2023, Updated By: Vinayak Bhanoo
 
 '''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiAssetRefrigerantLog
@@ -285,9 +286,9 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiA
                             ,raw_refActicityLogs.leak_threshold as Leak_Rate_threshold
                             ,raw_refActicityLogs.circuit_comment as Comments
                             ,raw_refActicityLogs.test_method as Test_Method
-                            ,iff(raw_refActicityLogs.is_test_successful=1, 'Yes', 'No') as Test_successful
+                            ,iff(UPPER(raw_refActicityLogs.is_test_successful)='TRUE', 'Yes', 'No') as Test_successful
                             ,iff(raw_refActicityLogs.status_id=1, 'Yes', 'No') as Deactivated
-                            ,iff(raw_refActicityLogs.is_contact_notified=1, 'Yes', 'No') as Contact_Notified
+                            ,iff(UPPER(raw_refActicityLogs.is_contact_notified)='TRUE', 'Yes', 'No') as Contact_Notified
                             ,raw_refActicityLogs.transaction_id as Transaction_ID
                             ,CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
                             ,(raw_refActicityLogs.circuit_capacity * raw_refActicityLogs.refrigerant_gwp) as Global_Warming_Potential
