@@ -513,3 +513,12 @@ select
 from 
     {var_client_custom_db}.{var_client_name}_custom_clientssdv_workplace_services_property_4684
 """.format(var_client_custom_db=var_client_custom_db, var_client_name=var_client_name))
+
+# COMMAND ----------
+
+# DBTITLE 1,Grant Access
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0009051305_capitalone_custom.ssdv_vw_OneView_Client TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0009051305_capitalone_custom.ssdv_vw_OneView_Client_Property TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0009051305_capitalone_custom.ssdv_vw_oneview_client_property_custom TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0009051305_capitalone_custom.clientssdv_vw_clientssdv_oneview_client_property_custom TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+         

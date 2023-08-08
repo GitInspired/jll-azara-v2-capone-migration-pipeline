@@ -676,3 +676,12 @@ select
 from 
     {var_client_custom_db}.{var_client_name}_custom_property_3626
 """.format(var_client_custom_db=var_client_custom_db, var_client_name=var_client_name))
+
+# COMMAND ----------
+
+# DBTITLE 1,Grant Access
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.Clientssdv_vw_CapitalOne_OneView_Client_Property TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_OneView_Client TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_OneView_Client_Property TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_OneView_Client_Property_Services TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_oneview_client_property_custom TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
