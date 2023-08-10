@@ -254,7 +254,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
 						   ON TRIM(raw_areasResp.employee_id) = TRIM(dv_employees.employee_id)
 					LEFT JOIN {var_client_custom_db}.custom_dv_employees                                             substEmployee
 						   ON TRIM(raw_areasResp.replaced_employee_id) = TRIM(substEmployee.employee_id) 
-                    LEFT JOIN {var_client_custom_db}.raw_contacts_contacts_corrigo                                  raw_contacts        on raw_areasResp.contact_id = raw_contacts.contact_id where raw_responsibilities.responsibility IS NOT NULL ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
+                    LEFT JOIN {var_client_custom_db}.raw_contacts_contacts_corrigo                                  raw_contacts        on raw_areasResp.contact_id = raw_contacts.contact_id where raw_responsibilities.responsibility IS NOT NULL and upper(raw_areasResp.locality) = 'LOCAL' ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
 
 # COMMAND ----------
 
@@ -353,7 +353,6 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiT
                             ,dv_employees.federal_id                     as Federal_ID
                             ,dv_employees.job_title                      as Job_Title
                             ,CAST('{refresh_date}' as TIMESTAMP)         as UpdateDate
-                            ,iff(upper(dv_employees.is_removed)='TRUE','Yes','No') as Is_Deleted
                         FROM {var_client_custom_db}.raw_time_card_entries_timecardentries_corrigo raw_timeCardEntries
                         JOIN {var_client_custom_db}.custom_hv_master_clients_tenants              h_masterClientsTen
                         ON TRIM(raw_timeCardEntries.source_id) = TRIM(h_masterClientsTen.source_id)
