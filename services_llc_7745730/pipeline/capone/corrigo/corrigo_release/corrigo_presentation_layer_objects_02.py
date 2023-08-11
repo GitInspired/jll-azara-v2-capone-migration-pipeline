@@ -261,6 +261,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
 # DBTITLE 1,ssdv_vw_Corrigo_vbiWorkOrderCheckInOuts
 '''
 Version: 1, Creation Date:7/26/2023 , Created By: Varun Kancharla
+Version: 2, Creation Date:8/11/2023 , Created By: Varun Kancharla
 '''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiWorkOrderCheckInOuts
                 AS
@@ -270,7 +271,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
                         raw_workOrderTelemetry.work_order_id AS Work_Order_ID,
                         raw_workOrderTelemetry.work_order_number AS Work_Order,
                         COALESCE(raw_workOrderTelemetry.employee_id,raw_workOrderTelemetry.service_provider_id) AS User_ID,
-                        raw_workOrderTelemetry.work_order_latitude AS Work_Order_Lat,
+                        CAST(raw_workOrderTelemetry.work_order_latitude as DECIMAL(23,7)) AS Work_Order_Lat,
                         raw_workOrderTelemetry.work_order_longitude AS Work_Order_Long,
                         raw_workOrderTelemetry.checkin_at AS CheckIn_Date,
                         raw_workOrderTelemetry.checkin_method AS CheckIn_Method,
@@ -416,3 +417,77 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
                      AND TRIM(raw_proposalItems.tenant_id) = TRIM(h_masterClientsTen.tenant_id)
                     LEFT JOIN {var_client_custom_db}.custom_dv_employees                        dv_empoyees
                            ON raw_proposalItems.employee_id = dv_empoyees.employee_id; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date,var_azara_raw_db=var_azara_raw_db))
+
+# COMMAND ----------
+
+# DBTITLE 1,ssdv_vw_Corrigo_vbiAssetActivityLog
+'''
+Version: 1, Creation Date: 08-11-2023, Created By: Sahil Sharma
+'''
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiAssetActivityLog
+        AS
+            With assetActivityLogs
+                as (
+                    SELECT DISTINCT
+                         h_masterClientsTen.client_name
+                        ,h_masterClientsTen.client_id
+                        ,CASE 
+                            WHEN raw_assetActivityLogs.asset_id IS NOT NULL THEN raw_assetActivityLogs.asset_id
+                            WHEN raw_assetActivityLogs.space_id IS NOT NULL THEN raw_assetActivityLogs.space_id
+                            WHEN raw_assetActivityLogs.classification_id IS NOT NULL THEN raw_assetActivityLogs.classification_id
+                        END as Asset_ID
+                        ,CASE 
+                            WHEN raw_assetActivityLogs.asset_id IS NOT NULL THEN raw_assets.name
+                            WHEN raw_assetActivityLogs.space_id IS NOT NULL THEN raw_spaces.space_name
+                            WHEN raw_assetActivityLogs.classification_id IS NOT NULL THEN raw_assetClassify.name
+                        END as Asset_Name
+                        ,CASE 
+                            WHEN raw_assetActivityLogs.asset_id IS NOT NULL THEN raw_assets.type
+                            WHEN raw_assetActivityLogs.space_id IS NOT NULL THEN raw_spaces.space_category
+                            WHEN raw_assetActivityLogs.classification_id IS NOT NULL THEN raw_assetClassify.category
+                        END as Asset_Category
+                        ,CASE 
+                            WHEN raw_assetActivityLogs.asset_id IS NOT NULL THEN raw_assets.is_offline
+                            WHEN raw_assetActivityLogs.space_id IS NOT NULL THEN raw_spaces.is_offline
+                            WHEN raw_assetActivityLogs.classification_id IS NOT NULL THEN raw_assetClassify.is_offline
+                        END as Is_Offline
+                        ,CASE 
+                            WHEN raw_assetActivityLogs.asset_id IS NOT NULL THEN raw_assets.area_id
+                            WHEN raw_assetActivityLogs.space_id IS NOT NULL THEN raw_spaces.area_id
+                            WHEN raw_assetActivityLogs.classification_id IS NOT NULL THEN raw_assetClassify.area_id
+                        END as Area_ID
+                        ,CASE 
+                            WHEN raw_assetActivityLogs.asset_id IS NOT NULL THEN raw_assets.orphan
+                            WHEN raw_assetActivityLogs.space_id IS NOT NULL THEN raw_spaces.is_orphan
+                            WHEN raw_assetActivityLogs.classification_id IS NOT NULL THEN raw_assetClassify.is_orphan
+                        END as Is_Orphan
+                        ,raw_assetActivityLogs.log_action
+                        ,raw_assetActivityLogs.action_taken_by
+                        ,raw_assetActivityLogs.log_comment
+                        ,raw_assetActivityLogs.action_taken_at
+                    FROM {var_client_custom_db}.raw_asset_activity_logs_asset_actlogs_corrigo        raw_assetActivityLogs
+                    JOIN {var_client_custom_db}.custom_hv_master_clients_tenants                     h_masterClientsTen
+                      ON TRIM(raw_assetActivityLogs.source_id)  = TRIM(h_masterClientsTen.source_id)
+                     AND TRIM(raw_assetActivityLogs.tenant_id) = TRIM(h_masterClientsTen.tenant_id)
+                    LEFT JOIN {var_client_custom_db}.raw_assets_assets_corrigo                       raw_assets
+                           ON TRIM(raw_assetActivityLogs.asset_id) = TRIM(raw_assets.asset_id)
+                    LEFT JOIN {var_client_custom_db}.raw_spaces_spaces_corrigo                       raw_spaces
+                           ON TRIM(raw_assetActivityLogs.space_id) = TRIM(raw_spaces.space_id)
+                    LEFT JOIN {var_client_custom_db}.raw_asset_classifications_assetclass_corrigo    raw_assetClassify
+                           ON TRIM(raw_assetActivityLogs.classification_id) = TRIM(raw_assetClassify.asset_classification_id)
+                    )
+                    SELECT DISTINCT
+                         client_name
+                        ,client_id as Company_ID
+                        ,Asset_id
+                        ,Asset_Name
+                        ,Asset_Category
+                        ,iff(upper(is_offline)='TRUE','Offline','Online') as Asset_Status
+                        ,Area_ID as Property_ID
+                        ,log_action as `Action`
+                        ,action_taken_by as `By`
+                        ,log_comment as `Comment`
+                        ,action_taken_at as `Date`
+                        ,CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
+                        ,iff(upper(Is_Orphan)='TRUE','Yes','No') as Is_Deleted
+                    FROM assetActivityLogs ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
