@@ -297,7 +297,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiA
                             ,raw_refActicityLogs.refrigerant_type as Transaction_Refrigerant_Type
                             ,raw_refActicityLogs.cylinder_number as Cylinder
                             ,raw_refActicityLogs.transaction_comment as Transaction_Comment
-                            ,iff(raw_refActicityLogs.exclude_leak_rate=1, 'Yes', 'No') as Exclude_from_leak_rate
+                            ,iff(upper(raw_refActicityLogs.exclude_leak_rate)='TRUE', 'Yes', 'No') as Exclude_from_leak_rate
                             ,raw_refActicityLogs.leak_rate as Current_Leak_Rate
                             ,raw_refActicityLogs.leak_threshold as Leak_Rate_threshold
                             ,raw_refActicityLogs.circuit_comment as Comments
