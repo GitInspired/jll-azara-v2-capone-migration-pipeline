@@ -401,7 +401,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
                        h_masterClientsTen.client_id AS Company_ID,
                        raw_proposalItems.proposal_id AS Proposal_ID,
                        raw_proposalItems.order_index AS Step,
-                       CONCAT(dv_empoyees.first_name,' ', dv_empoyees.last_name) AS Approver,
+                       last_updated_by AS Approver,
                        raw_proposalItems.response || ' - ' || CAST( raw_proposalItems.last_updated_at AS string) AS Response,
                        raw_proposalItems.comment AS Note,
                        case 
