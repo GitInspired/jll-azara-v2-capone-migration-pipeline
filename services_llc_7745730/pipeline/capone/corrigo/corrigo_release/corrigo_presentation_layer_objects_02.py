@@ -271,19 +271,19 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiW
                         raw_workOrderTelemetry.work_order_id AS Work_Order_ID,
                         raw_workOrderTelemetry.work_order_number AS Work_Order,
                         COALESCE(raw_workOrderTelemetry.employee_id,raw_workOrderTelemetry.service_provider_id) AS User_ID,
-                        CAST(raw_workOrderTelemetry.work_order_latitude as DECIMAL(23,7)) AS Work_Order_Lat,
-                        raw_workOrderTelemetry.work_order_longitude AS Work_Order_Long,
+                        CAST(raw_workOrderTelemetry.work_order_latitude as DECIMAL(9,7)) AS Work_Order_Lat,
+                        CAST(raw_workOrderTelemetry.work_order_longitude  as DECIMAL(9,6)) AS Work_Order_Long,
                         raw_workOrderTelemetry.checkin_at AS CheckIn_Date,
                         raw_workOrderTelemetry.checkin_method AS CheckIn_Method,
-                        raw_workOrderTelemetry.checkin_latitude AS CheckIn_Lat,
-                        raw_workOrderTelemetry.checkin_longitude AS CheckIn_Long,
-                        raw_workOrderTelemetry.checkin_distance AS CheckIn_Distance,
+                        CAST(raw_workOrderTelemetry.checkin_latitude  as DECIMAL(9,6)) AS CheckIn_Lat,
+                        CAST(raw_workOrderTelemetry.checkin_longitude  as DECIMAL(9,6)) AS CheckIn_Long,
+                        CAST(raw_workOrderTelemetry.checkin_distance as DECIMAL(9,2)) AS CheckIn_Distance,
                         raw_workOrderTelemetry.checkin_status AS CheckIn_Status,
                         raw_workOrderTelemetry.checkout_at AS CheckOut_Date,
                         raw_workOrderTelemetry.checkout_method AS CheckOut_Method,
-                        raw_workOrderTelemetry.checkout_latitude AS CheckOut_Lat,
-                        raw_workOrderTelemetry.checkout_longitude AS CheckOut_Long,
-                        raw_workOrderTelemetry.checkout_distance AS CheckOut_Distance,
+                        CAST(raw_workOrderTelemetry.checkout_latitude as DECIMAL(9,6)) AS CheckOut_Lat,
+                        CAST(raw_workOrderTelemetry.checkout_longitude as DECIMAL(9,6)) AS CheckOut_Long,
+                        CAST(raw_workOrderTelemetry.checkout_distance as DECIMAL(9,2)) AS CheckOut_Distance,
                         raw_workOrderTelemetry.checkout_status AS CheckOut_Status,
                         CAST('{refresh_date}' as TIMESTAMP) AS UpdateDate
                     FROM {var_client_custom_db}.raw_work_order_telemetry_wo_telemetry_corrigo raw_workOrderTelemetry
@@ -422,7 +422,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
 
 # DBTITLE 1,ssdv_vw_Corrigo_vbiAssetActivityLog
 '''
-Version: 1, Creation Date: 08-11-2023, Created By: Sahil Sharma
+Version: 1, Creation Date: 8/11/2023 , Created By: Varun Kancharla
 '''
 spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiAssetActivityLog
         AS
@@ -491,3 +491,79 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiA
                         ,CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
                         ,iff(upper(Is_Orphan)='TRUE','Yes','No') as Is_Deleted
                     FROM assetActivityLogs ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
+
+# COMMAND ----------
+
+# DBTITLE 1,clientssdv_vw_Corrigo_Customer_Custom
+'''
+Version: 1, Creation Date: 8/14/2023 , Created By: Varun Kancharla
+'''
+
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.clientssdv_vw_Corrigo_Customer_Custom 
+                AS
+                SELECT DISTINCT
+                    object_ID as CustomerCustomID
+                    ,Branch_Phone
+                    ,Work_Zone_ID
+                    ,DID
+                    ,BU_Number
+                    ,FM_Lead
+                    ,JLL_MES_Technician
+                    ,JLL_MES_HVAC_Engineer
+                    ,Facility_Manager
+                    ,Facility_Manager_Phone
+                    ,Senior_Facility_Manager
+                    ,Senior_Facility_Manager_Phone
+                    ,FM_Site_Assessment_Needed
+                    ,MCIM_Assessment_Link
+                    ,Escalation_1_Name
+                    ,Escalation_1_Phone
+                    ,Escalation_2_Name
+                    ,Escalation_2_Phone
+                    ,Escalation_3_Name
+                    ,Escalation_3_Phone
+                    ,Escalation_4_Name
+                    ,Escalation_4_Phone
+                    ,External_Property_ID
+                    ,Status
+                    ,Union_Yes_No
+                    ,Union_Scope
+                    ,Floor_Area
+                    ,Leased_or_Owned
+                    ,ADA_Doors
+                    ,ATM_Only_Walk_Up_or_Drive_Up
+                    ,ATM_Only_Standing_or_Enclosed
+                    ,ATM_Only_HVAC_PM_needed
+                    ,ATM_Only_Is_JLL_responsible_for_the_Lighting
+                    ,ATM_Only_Is_JLL_responsible_for_HVAC
+                    ,ATM_Only_Does_it_have_a_Roof
+                    ,ATM_Only_Is_there_landscaping_around_the_ATM_that_will_require
+                    ,Event_Disaster_Storm_Property_Status
+                    ,Fresh_Air_In_Take_Cafes_Only
+                    ,Natural_Gas
+                    ,CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
+                FROM {var_client_custom_db}.Corrigo_Custom_Customer ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
+
+# COMMAND ----------
+
+# DBTITLE 1,clientssdv_vw_Corrigo_User_Custom
+'''
+Version: 1, Creation Date: 8/14/2023 , Created By: Varun Kancharla
+'''
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.clientssdv_vw_Corrigo_User_Custom 
+                AS
+                SELECT DISTINCT
+                    Object_ID as UserCustomID
+                    ,Dedicated_Client
+                    ,JLL_Organization
+                    ,Peoplesoft_Property_ID
+                    ,Union_Local
+                    ,Weekly_Scheduled_Hours
+                    ,Primary_Job_Function
+                    ,Exemption_Status
+                    ,Time_Keeper
+                    ,Time_Approver
+                    ,CapOne_EID
+                    ,Region
+                    ,CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
+                FROM {var_client_custom_db}.Corrigo_Custom_User ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))

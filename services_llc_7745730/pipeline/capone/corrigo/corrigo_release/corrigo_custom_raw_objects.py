@@ -790,4 +790,24 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_asset_activity_l
 
 # COMMAND ----------
 
-# MAGIC %md
+# DBTITLE 1,raw_customer_groups_cust_groups_corrigo
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_customer_groups_cust_groups_corrigo
+                AS 
+                SELECT
+                    hcg.tenant_id, hcg.source_id, customer_id, group_id, hcg.dss_record_source as h_dss_record_source, hcg.dss_load_date as h_dss_load_date, hcg.dss_create_time as h_dss_create_time,
+                    lcg.hk_h_customers, lcg.hk_l_customer_customer_groups, lcg.dss_record_source as l_dss_record_source, lcg.dss_load_date as l_dss_load_date, lcg.dss_create_time as l_dss_create_time,
+                    scg.*
+                FROM      {var_client_raw_db}.s_customer_groups_cust_groups_corrigo_current scg
+                LEFT JOIN {var_azara_raw_db}.h_customer_groups                              hcg
+                    ON hcg.hk_h_customer_groups= scg.hk_h_customer_groups 
+                LEFT JOIN {var_azara_raw_db}.l_customer_customer_groups                     lcg
+                    ON lcg.hk_h_customer_groups=scg.hk_h_customer_groups
+                WHERE trim(hcg.tenant_id) = "{var_tenant_id}"; """.format(var_client_raw_db=var_client_raw_db, var_client_custom_db=var_client_custom_db, var_azara_raw_db=var_azara_raw_db,var_tenant_id=var_tenant_id))
+
+# COMMAND ----------
+
+# DBTITLE 1,raw_custom_attribute_values
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_custom_attribute_values
+                AS 
+                SELECT * FROM {var_azara_raw_db}.ref_custom_attribute_values 
+                WHERE tenant_id = "{var_tenant_id}"; """.format(var_client_custom_db=var_client_custom_db, var_azara_raw_db=var_azara_raw_db,var_tenant_id=var_tenant_id))
