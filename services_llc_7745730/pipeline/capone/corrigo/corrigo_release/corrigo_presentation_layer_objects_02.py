@@ -381,7 +381,7 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
                         cost_description as description,
                         quantity,
                         cost_per_unit as unit_price_rate,
-                        0 subtotal,
+                        quantity * cost_per_unit as subtotal,
                         case when is_exclude='False' then 0 else 1 end as is_exclude ,
                         case when is_override='False' then 0 else 1 end as is_override ,
                         CAST('{refresh_date}' as TIMESTAMP) AS UpdateDate
