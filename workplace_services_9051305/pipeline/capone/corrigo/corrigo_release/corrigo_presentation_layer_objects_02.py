@@ -284,21 +284,19 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
                        h_masterClientsTen.client_id AS Company_ID,
                        raw_proposalItems.proposal_id AS Proposal_ID,
                        raw_proposalItems.order_index AS Step,
-                       last_updated_by AS Approver,
+                       raw_proposalItems.last_updated_by AS Approver,
                        raw_proposalItems.response || ' - ' || CAST( raw_proposalItems.last_updated_at AS string) AS Response,
                        raw_proposalItems.comment AS Note,
                        case 
-                           when dv_empoyees.employee_type_id = 12 then raw_proposalItems.nte 
-                           when dv_empoyees.employee_type_id = 1 then raw_proposalItems.nte_limit 
+                           when raw_proposalItems.employee_type_id = 12 then raw_proposalItems.nte 
+                           when raw_proposalItems.employee_type_id = 1 then raw_proposalItems.nte_limit 
                            else null 
                        end as Authority,
                        CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
                     FROM {var_client_custom_db}.raw_proposal_items_propitems_corrigo            raw_proposalItems
                     JOIN {var_client_custom_db}.custom_hv_master_clients_tenants                h_masterClientsTen
                       ON TRIM(raw_proposalItems.source_id) = TRIM(h_masterClientsTen.source_id) 
-                     AND TRIM(raw_proposalItems.tenant_id) = TRIM(h_masterClientsTen.tenant_id)
-                    LEFT JOIN {var_client_custom_db}.custom_dv_employees                        dv_empoyees
-                           ON raw_proposalItems.employee_id = dv_empoyees.employee_id; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date,var_azara_raw_db=var_azara_raw_db))
+                     AND TRIM(raw_proposalItems.tenant_id) = TRIM(h_masterClientsTen.tenant_id); """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date,var_azara_raw_db=var_azara_raw_db))
 
 # COMMAND ----------
 
