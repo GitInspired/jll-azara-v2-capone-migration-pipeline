@@ -1,8 +1,9 @@
 # Databricks notebook source
 # DBTITLE 1,Imports
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, lower, explode, translate, split, trim, first, regexp_replace
 from datetime import timezone
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import current_timestamp, lit
+from pyspark.sql.types import StringType
 import datetime
 
 # COMMAND ----------
@@ -258,4 +259,249 @@ df_workOrderTask.write.format('delta') \
 
 # COMMAND ----------
 
-# MAGIC %md
+# DBTITLE 1,Corrigo_Custom_Customer
+# Final Table Name
+Table_Name = 'Corrigo_Custom_Customer'
+
+# Target Column list
+target_col_list = [ "object_id"
+                    ,"Super_Region"
+                    ,"DID"
+                    ,"BU_Number"
+                    ,"Work_Zone_ID"
+                    ,"External_Property_ID"
+                    ,"Escalation_1"
+                    ,"Escalation_1_Phone"
+                    ,"Escalation_2"
+                    ,"Escalation_2_Phone"
+                    ,"Escalation_3"
+                    ,"Escalation_3_Phone"
+                    ,"After_Hours_Escalation_1_Shift_Phone"
+                    ,"After_Hours_Escalation_2"
+                    ,"After_Hours_Escalation_2_Phone"
+                    ,"After_Hours_Escalation_3"
+                    ,"After_Hours_Escalation_3_Phone"
+                    ,"Status"
+                    ,"Union_Yes_No" 
+                    ,"Union_Scope"
+                    ,"FM_Lead"
+                    ,"FM_Onsite_Frequency"
+                    ,"Chief_Engineer"
+                    ,"Chief_Engineer_Phone"
+                    ,"Assistant_Chief_Engineer"
+                    ,"Assistant_Chief_Engineer_Phone"
+                    ,"Senior_Facility_Manager"
+                    ,"Senior_Facility_Manager_Phone"
+                    ,"Facility_Manager"
+                    ,"Facility_Manager_Phone"
+                    ,"Assistant_Facility_Manager"
+                    ,"Assistant_Facility_Manager_Phone"
+                    ,"Regional_Facility_Manager"
+                    ,"Regional_Facility_Manager_Phone"
+                    ,"Regional_Engineering_Manager"
+                    ,"Regional_Engineering_Manager_Phone"
+                    ,"Regional_Lead"
+                    ,"Regional_Lead_Phone"
+                    ,"Natural_Gas"
+                    ,"Inspections_Daily_Critical_Checks"
+                    ,"Inspections_Weekly_Building_Rounds"
+                    ,"Inspections_Monthly_Fire_Extinguisher"
+                    ,"Inspections_Monthly_FM_Site_Inspection"
+                    ,"Inspections_Monthly_Kitchen_Documents_Upload"
+                    ,"Inspections_Monthly_PA_System_Work_Effort"
+                    ,"Inspections_Monthly_Roof_Inspection"
+                    ,"Inspections_Monthly_Satellite_Phone_Service_Test"
+                    ,"Inspections_Monthly_SDS_Inspection"
+                    ,"Inspections_Monthly_Spill_Response_Kit_and_AST_Inspections"
+                    ,"Inspections_Monthly_Vehicle_Inspection"
+                    ,"Inspections_Quarterly_Emergency_Response_Mock_Drills"
+                    ,"Inspections_Quarterly_Portable_Ladder_Inspection"
+                    ,"Inspections_Annual_FCI_Inspection"
+                    ,"Inspections_Annual_Clock_Inspection_Fall_Back"
+                    ,"Inspections_Annual_Clock_Inspection_Spring_Forward"
+                    ,"Inspections_Annual_Fixed_Ladder_Inspection"
+                    ,"Inspections_Annual_JLL_First_Aid_Kit_Inspections"
+                    ,"Inspections_Annual_SDS_Inspection"
+                    ,"Inspections_Annual_Spill_Response_Kit_and_AST_Inspection"]
+
+# Reading data from "custom_attribute_values" into dataframe
+df = spark.read.table(f'{var_client_custom_db}.raw_custom_attribute_values')
+attr_val_df = df.filter(lower(df['actor_type']) == 'customer').withColumnRenamed("source_id","attr_source_id").withColumnRenamed("tenant_id","attr_tenant_id")
+
+# Reading data from "custom_hv_master_clients_tenants" into dataframe
+client_df = spark.read.table(f'{var_client_custom_db}.custom_hv_master_clients_tenants')
+
+# Perform an inner join on the common key column (assuming it's "common_column")
+join_condition = attr_val_df["attr_tenant_id"] == client_df["tenant_id"]
+joined_df = attr_val_df.join(client_df, join_condition, "inner")
+
+#Converting attributes to a list, exploding the rows and removing special characters 
+list_df = attr_val_df.select(["object_id","attributes"]).\
+    withColumn("attributes", regexp_replace(col("attributes"),'^{"|"}$', "")).\
+        withColumn("attributes", split(col("attributes"),'","')).withColumn("attributes", explode(col("attributes")))
+
+#splitting the exploded rows to column name and values and trimming for whitespaces in column name
+split_df = list_df.withColumn("att_col", split(col("attributes"),'":"').getItem(0)).\
+    withColumn("att_val", split(col("attributes"),'":"').getItem(1))
+
+#Replacing whitespaces and slashes with "_", removing brackets replacing multiple "_" with a single one           
+split_df = split_df.withColumn("att_col", regexp_replace(col("att_col"),"[^a-zA-Z0-9_]+", "_")).\
+    withColumn("att_col", regexp_replace(col("att_col"),"^_|_$", "")).withColumn("att_val",translate("att_val",'\\',""))
+
+#Transposing the rows for attribute columns
+transpose_df = split_df.groupBy("object_id").pivot('att_col').agg(first('att_val'))
+
+#Joining transposed DF with existing joined_df
+df3 = joined_df.join(transpose_df,"object_id","left")
+
+#Final column list having all target and derived column names
+missing_col_list = list(set(target_col_list) - set(df3.columns))
+
+for colm in missing_col_list:
+    df3 = df3.withColumn(colm, lit(None).cast(StringType()))
+
+# Save the result as a new table
+df3.write.mode("overwrite").option("mergeSchema", "true").saveAsTable(f"{var_client_custom_db}.{Table_Name}")
+
+# COMMAND ----------
+
+# DBTITLE 1,Corrigo_Custom_User
+# Final Table Name
+Table_Name = 'Corrigo_Custom_User'
+
+# Target Column list
+target_col_list = [ "object_id"
+                    ,"Dedicated_Client"
+                    ,"JLL_Organization"
+                    ,"Peoplesoft_Property_ID"
+                    ,"Union_Local"
+                    ,"Weekly_Scheduled_Hours"
+                    ,"Primary_Job_Function"
+                    ,"Exemption_Status"
+                    ,"Time_Keeper"
+                    ,"Time_Approver"
+                    ,"CapOne_EID"
+                    ,"Region"]
+
+# Reading data from "custom_attribute_values" into dataframe
+df = spark.read.table(f'{var_client_custom_db}.raw_custom_attribute_values')
+attr_val_df = df.filter(lower(df['actor_type']) == 'user').withColumnRenamed("source_id","attr_source_id").withColumnRenamed("tenant_id","attr_tenant_id")
+
+# Reading data from "custom_hv_master_clients_tenants" into dataframe
+client_df = spark.read.table(f'{var_client_custom_db}.custom_hv_master_clients_tenants')
+
+# Perform an inner join on the common key column (assuming it's "common_column")
+join_condition = attr_val_df["attr_tenant_id"] == client_df["tenant_id"]
+joined_df = attr_val_df.join(client_df, join_condition, "inner")
+
+#Converting attributes to a list, exploding the rows and removing special characters 
+list_df = attr_val_df.select(["object_id","attributes"]).\
+    withColumn("attributes", regexp_replace(col("attributes"),'^{"|"}$', "")).\
+        withColumn("attributes", split(col("attributes"),'","')).withColumn("attributes", explode(col("attributes")))
+
+#splitting the exploded rows to column name and values and trimming for whitespaces in column name
+split_df = list_df.withColumn("att_col", split(col("attributes"),'":"').getItem(0)).\
+    withColumn("att_val", split(col("attributes"),'":"').getItem(1))
+
+#Replacing whitespaces and slashes with "_", removing brackets replacing multiple "_" with a single one           
+split_df = split_df.withColumn("att_col", regexp_replace(col("att_col"),"[^a-zA-Z0-9_]+", "_")).\
+    withColumn("att_col", regexp_replace(col("att_col"),"^_|_$", "")).withColumn("att_val",translate("att_val",'\\',""))
+
+#Transposing the rows for attribute columns
+transpose_df = split_df.groupBy("object_id").pivot('att_col').agg(first('att_val'))
+
+#Joining transposed DF with existing joined_df
+df3 = joined_df.join(transpose_df,"object_id","left")
+
+#Final column list having all target and derived column names
+missing_col_list = list(set(target_col_list) - set(df3.columns))
+
+for colm in missing_col_list:
+    df3 = df3.withColumn(colm, lit(None).cast(StringType()))
+
+# Save the result as a new table
+df3.write.mode("overwrite").option("mergeSchema", "true").saveAsTable(f"{var_client_custom_db}.{Table_Name}")
+
+# COMMAND ----------
+
+# DBTITLE 1,Corrigo_Custom_WorkOrder
+# Final Table Name
+Table_Name = 'Corrigo_Custom_WorkOrder'
+
+# Target Column list
+target_col_list = [ "object_id"
+                    ,"Accidental_Release_lbs"
+                    ,"ADA_Reporting"
+                    ,"Capital_One_ESS"
+                    ,"Change_Control_Number"
+                    ,"Contingency_Spend"
+                    ,"Diesel_Fuel_Usage"
+                    ,"Diesel_Quantity_gal"
+                    ,"Energy_Savings"
+                    ,"Event_Disaster_Storm_Related"
+                    ,"Financial_Governance"
+                    ,"Help_Desk_Review"
+                    ,"HR_Case_Number"
+                    ,"JCAP_OCP_Section"
+                    ,"JCAP_Admin_Only_WO"
+                    ,"JDE_Export_Schedule_Start"
+                    ,"Manual_Work_Order_Number"
+                    ,"MCIM_FCI_Assessment_Link"
+                    ,"MCIM_Assessments"
+                    ,"NOC_Reactive_Proactive"
+                    ,"NOC_Related"
+                    ,"PRIME_Audit_Work_Order"
+                    ,"Propane_Fuel_Usage"
+                    ,"Propane_Quantity_lbs"
+                    ,"Property_Management_Billing"
+                    ,"Quality_Control_Audit"
+                    ,"Refrigerant_Added_lbs"
+                    ,"Refrigerant_Recovered_lbs"
+                    ,"Refrigerant_Type"
+                    ,"Regulatory_Agency"
+                    ,"Re_Opening_Reason"
+                    ,"SLA_Extension"
+                    ,"Unique_Contract_Identifier_PM_PMRW_Schedules"]
+
+# Reading data from "custom_attribute_values" into dataframe
+df = spark.read.table(f'{var_client_custom_db}.raw_custom_attribute_values')
+attr_val_df = df.filter(lower(df['actor_type']) == 'work order').withColumnRenamed("source_id","attr_source_id").withColumnRenamed("tenant_id","attr_tenant_id")
+
+# Reading data from "custom_hv_master_clients_tenants" into dataframe
+client_df = spark.read.table(f'{var_client_custom_db}.custom_hv_master_clients_tenants')
+
+# Perform an inner join on the common key column (assuming it's "common_column")
+join_condition = attr_val_df["attr_tenant_id"] == client_df["tenant_id"]
+joined_df = attr_val_df.join(client_df, join_condition, "inner")
+
+#Converting attributes to a list, exploding the rows and removing special characters 
+list_df = attr_val_df.select(["object_id","attributes"]).\
+    withColumn("attributes", regexp_replace(col("attributes"),'^{"|"}$', "")).\
+        withColumn("attributes", split(col("attributes"),'","')).withColumn("attributes", explode(col("attributes")))
+
+#splitting the exploded rows to column name and values and trimming for whitespaces in column name
+split_df = list_df.withColumn("att_col", split(col("attributes"),'":"').getItem(0)).\
+    withColumn("att_val", split(col("attributes"),'":"').getItem(1))
+
+#Replacing whitespaces and slashes with "_", removing brackets replacing multiple "_" with a single one           
+split_df = split_df.withColumn("att_col", regexp_replace(col("att_col"),"[^a-zA-Z0-9_]+", "_")).\
+    withColumn("att_col", regexp_replace(col("att_col"),"^_|_$", "")).withColumn("att_val",translate("att_val","\\",""))
+
+#Transposing the rows for attribute columns
+transpose_df = split_df.groupBy("object_id").pivot('att_col').agg(first('att_val'))
+
+#Joining transposed DF with existing joined_df
+df3 = joined_df.join(transpose_df,"object_id","left")
+
+#Final column list having all target and derived column names
+missing_col_list = list(set(target_col_list) - set(df3.columns))
+
+for colm in missing_col_list:
+    df3 = df3.withColumn(colm, lit(None).cast(StringType()))
+
+# Save the result as a new table
+df3.write.mode("overwrite").option("mergeSchema", "true").saveAsTable(f"{var_client_custom_db}.{Table_Name}")
+
+# COMMAND ----------
+
+

@@ -806,4 +806,12 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_customer_groups_
 
 # COMMAND ----------
 
+# DBTITLE 1,raw_custom_attribute_values
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.raw_custom_attribute_values
+                AS 
+                SELECT * FROM {var_azara_raw_db}.ref_custom_attribute_values 
+                WHERE tenant_id = "{var_tenant_id}"; """.format(var_client_custom_db=var_client_custom_db, var_azara_raw_db=var_azara_raw_db,var_tenant_id=var_tenant_id))
+
+# COMMAND ----------
+
 
