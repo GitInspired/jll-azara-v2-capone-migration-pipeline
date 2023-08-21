@@ -565,3 +565,78 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.clientssdv_vw_Corrig
                     ,Region
                     ,CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
                 FROM {var_client_custom_db}.Corrigo_Custom_User ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
+
+# COMMAND ----------
+
+# DBTITLE 1,ssdv_vw_Corrigo_vbiAssetRefrigerantLog
+'''
+Version: <1>, Creation Date: <7/11/2023>, Created By: <Varun Kancharla>
+Version: <2>, Creation Date: <8/2/2023>, Updated By: <Varun Kancharla>
+'''
+spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiAssetRefrigerantLog
+                    AS
+                        SELECT DISTINCT
+                            h_masterClientsTen.client_name as Client_Name
+                            ,h_masterClientsTen.client_id as Company_ID
+                            ,raw_refActicityLogs.asset_id as Asset_ID
+                            ,raw_assets.name as Asset_Name
+                            ,raw_areas.area_name as Property
+                            ,raw_refActicityLogs.action_taken_on as Date
+                            ,raw_refActicityLogs.work_order_id as Work_Order_ID
+                            ,raw_refActicityLogs.performed_by as Performed_By
+                            ,raw_refActicityLogs.certificate_name as Certification_Number_or_Name
+                            ,raw_refActicityLogs.circuit_number as Circuit_Number
+                            ,raw_refActicityLogs.circuit_capacity as Normal_Capacity
+                            ,raw_refActicityLogs.transaction_type as Transaction
+                            ,raw_refActicityLogs.quantity as Quantity_Used
+                            ,raw_refActicityLogs.refrigerant_type as Transaction_Refrigerant_Type
+                            ,raw_refActicityLogs.cylinder_number as Cylinder
+                            ,raw_refActicityLogs.transaction_comment as Transaction_Comment
+                            ,iff(upper(raw_refActicityLogs.exclude_leak_rate)='TRUE', 'Yes', 'No') as Exclude_from_leak_rate
+                            ,raw_refActicityLogs.leak_rate as Current_Leak_Rate
+                            ,raw_refActicityLogs.leak_threshold as Leak_Rate_threshold
+                            ,raw_refActicityLogs.circuit_comment as Comments
+                            ,raw_refActicityLogs.test_method as Test_Method
+                            ,iff(UPPER(raw_refActicityLogs.is_test_successful)='TRUE', 'Yes', 'No') as Test_successful
+                            ,iff(raw_refActicityLogs.status_id=1, 'Yes', 'No') as Deactivated
+                            ,iff(UPPER(raw_refActicityLogs.is_contact_notified)='TRUE', 'Yes', 'No') as Contact_Notified
+                            ,raw_refActicityLogs.transaction_id as Transaction_ID
+                            ,CAST('{refresh_date}' as TIMESTAMP) as UpdateDate
+                            ,(raw_refActicityLogs.circuit_capacity * raw_refActicityLogs.refrigerant_gwp) as Global_Warming_Potential
+                            ,iff(UPPER(raw_assets.deleted_flag)='TRUE', 'Yes', 'No') as Is_Deleted
+                        FROM {var_client_custom_db}.raw_activity_logs_refrigerant_ref_act_logs_corrigo  raw_refActicityLogs
+                        LEFT JOIN {var_client_custom_db}.raw_assets_assets_corrigo                      raw_assets 
+                            ON raw_refActicityLogs.hk_h_assets = raw_assets.hk_h_assets
+                        LEFT JOIN {var_client_custom_db}.raw_areas_areas_corrigo                        raw_areas
+                            ON TRIM(raw_assets.area_id) = TRIM(raw_areas.area_id)
+                        JOIN {var_client_custom_db}.custom_hv_master_clients_tenants                    h_masterClientsTen
+                        ON TRIM(raw_refActicityLogs.source_id) = TRIM(h_masterClientsTen.source_id)
+                        AND TRIM(raw_refActicityLogs.tenant_id) = TRIM(h_masterClientsTen.tenant_id) ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
+
+# COMMAND ----------
+
+# DBTITLE 1,Grant Access
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_User_Custom TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiAssetActivityLog TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiAssetRefrigerantLog TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiContacts TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiPMRMVendorInvoiceItems TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiProposalApprovals TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiSLAByPriority TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiTimeCardEntries TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiUsers TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiUserTeams TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiWorkOrderLineItems TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_Corrigo_vbiWorkZoneResponsibilities TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_User_Custom TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiAssetActivityLog TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiAssetRefrigerantLog TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiContacts TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiPMRMVendorInvoiceItems TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiProposalApprovals TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiSLAByPriority TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiTimeCardEntries TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiUsers TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiUserTeams TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiWorkOrderLineItems TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
+#spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_Corrigo_vbiWorkZoneResponsibilities TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");
