@@ -461,16 +461,16 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiS
 # COMMAND ----------
 
 # DBTITLE 1,Grant Access
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiassetattributes TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbicustomercontacts TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbicustomers TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiequipmentworkedon TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbipmrmworkdescription TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbipmrmworkorders TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiproposals TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiassetattributes TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbicustomercontacts TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbicustomers TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiequipmentworkedon TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbipmrmworkdescription TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbipmrmworkorders TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiproposals TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
 spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiserviceproviderinsurance TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
 spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiserviceproviderpricelists TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");            
-spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiserviceproviders TO #`jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
+spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiserviceproviders TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");           
 spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiworkorderactivitylog TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");            
 spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.ssdv_vw_corrigo_vbiworkzones TO `jll-azara-custom-CapOneJLLAcctTeam-preprod`""");
 #spark.sql("""GRANT SELECT ON VIEW jll_azara_catalog.jll_azara_0007745730_capitalone_custom.#ssdv_vw_corrigo_vbiassetattributes TO `jll-azara-custom-CapOneJLLAcctTeam-read`""");           
