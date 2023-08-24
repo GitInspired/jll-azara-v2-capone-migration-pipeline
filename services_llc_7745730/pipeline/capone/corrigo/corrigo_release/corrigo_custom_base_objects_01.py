@@ -322,7 +322,9 @@ df_inspections = spark.sql(""" SELECT DISTINCT
                                     case 
                                         when LTRIM(RTRIM(lower(r_inspections.response))) = 'yes' then 'Yes' 
                                         when LTRIM(RTRIM(lower(r_inspections.response))) = 'no' then 'No' 
-                                        when (LTRIM(RTRIM(lower(r_inspections.response))) = 'na' or LTRIM(RTRIM(lower(r_inspections.response))) = 'n/a') then 'N/A' else r_inspections.response 
+                                        when LTRIM(RTRIM(lower(r_inspections.response))) = 'na' then 'NA'
+                                        when LTRIM(RTRIM(lower(r_inspections.response))) = 'n/a' then 'N/A' 
+                                        else r_inspections.response 
                                     end as response,
                                     r_inspections.is_removed as removed_flag,
                                     r_inspections.asset_id,
@@ -330,9 +332,9 @@ df_inspections = spark.sql(""" SELECT DISTINCT
                                     r_inspections.hk_h_work_orders,
                                     r_documents.document_title,
                                     r_documents.document_url,
-                                    'r_inspections.procedure_category' as procedure_category
+                                    r_inspections.procedure_category as procedure_category
                                 FROM {var_client_custom_db}.raw_inspections_inspections_corrigo       r_inspections
-                                LEFT JOIN {var_client_custom_db}.raw_documents_documents_corrigo      r_documents ON r_inspections.hk_h_work_orders = r_documents.hk_h_work_orders and r_documents.object_type_id = 37
+                                LEFT JOIN {var_client_custom_db}.raw_documents_documents_corrigo      r_documents ON r_inspections.inspection_id = r_documents.document_object_id and r_documents.object_type_id = 37
                                 JOIN {var_client_custom_db}.custom_hv_master_clients_tenants          h_masterClientsTen
                                   ON TRIM(h_masterClientsTen.tenant_id)=TRIM(r_inspections.tenant_id) 
                                  AND TRIM(h_masterClientsTen.source_id)=TRIM(r_inspections.source_id) 
