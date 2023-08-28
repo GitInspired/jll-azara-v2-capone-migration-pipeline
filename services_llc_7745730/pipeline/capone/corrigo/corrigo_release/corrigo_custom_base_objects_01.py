@@ -319,11 +319,10 @@ df_inspections = spark.sql(""" SELECT DISTINCT
                                     r_inspections.status_id,
                                     r_inspections.exception as flag,
                                     r_inspections.inspection_status,
-                                    case 
-                                        when LTRIM(RTRIM(lower(r_inspections.response))) = 'yes' then 'Yes' 
-                                        when LTRIM(RTRIM(lower(r_inspections.response))) = 'no' then 'No' 
-                                        when LTRIM(RTRIM(lower(r_inspections.response))) = 'na' then 'NA'
-                                        when LTRIM(RTRIM(lower(r_inspections.response))) = 'n/a' then 'N/A' 
+                                    case
+                                        when r_inspections.response is NULL   then r_inspections.response
+                                        when r_inspections.response = ''      then r_inspections.response
+                                        when r_inspections.response_type_id=8 then iff(r_inspections.response=1,'Yes','No') 
                                         else r_inspections.response 
                                     end as response,
                                     r_inspections.is_removed as removed_flag,

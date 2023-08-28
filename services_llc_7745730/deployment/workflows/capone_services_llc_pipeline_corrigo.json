@@ -25,6 +25,7 @@
         "tasks": [
             {
                 "task_key": "init_pipeline",
+                "run_if": "ALL_SUCCESS",
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/init_pipeline",
                     "source": "WORKSPACE"
@@ -40,6 +41,7 @@
             },
             {
                 "task_key": "init_raw",
+                "run_if": "ALL_SUCCESS",
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/corrigo_custom_raw_objects",
                     "source": "WORKSPACE"
@@ -63,6 +65,7 @@
                         "task_key": "init_raw"
                     }
                 ],
+                "run_if": "ALL_SUCCESS",
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/corrigo_custom_helper_objects",
                     "source": "WORKSPACE"
@@ -83,6 +86,7 @@
                         "task_key": "refreshing_helper_views"
                     }
                 ],
+                "run_if": "ALL_SUCCESS",
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/corrigo_custom_base_objects_01",
                     "source": "WORKSPACE"
@@ -103,6 +107,7 @@
                         "task_key": "refreshing_helper_views"
                     }
                 ],
+                "run_if": "ALL_SUCCESS",
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/corrigo_custom_base_objects_02",
                     "source": "WORKSPACE"
@@ -126,6 +131,7 @@
                         "task_key": "updating_base_objects_01"
                     }
                 ],
+                "run_if": "ALL_SUCCESS",
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/corrigo_presentation_layer_objects_01",
                     "source": "WORKSPACE"
@@ -149,8 +155,33 @@
                         "task_key": "updating_base_objects_02"
                     }
                 ],
+                "run_if": "ALL_SUCCESS",
                 "notebook_task": {
                     "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/corrigo_presentation_layer_objects_02",
+                    "source": "WORKSPACE"
+                },
+                "existing_cluster_id": "0518-082404-whk12x4x",
+                "timeout_seconds": 0,
+                "email_notifications": {},
+                "notification_settings": {
+                    "no_alert_for_skipped_runs": false,
+                    "no_alert_for_canceled_runs": false,
+                    "alert_on_last_attempt": false
+                }
+            },
+            {
+                "task_key": "refreshing_final_views_03",
+                "depends_on": [
+                    {
+                        "task_key": "updating_base_objects_01"
+                    },
+                    {
+                        "task_key": "updating_base_objects_02"
+                    }
+                ],
+                "run_if": "ALL_SUCCESS",
+                "notebook_task": {
+                    "notebook_path": "/jll-azara-0007745730-capitalone/corrigo/corrigo_release/corrigo_presentation_layer_objects_03",
                     "source": "WORKSPACE"
                 },
                 "existing_cluster_id": "0518-082404-whk12x4x",

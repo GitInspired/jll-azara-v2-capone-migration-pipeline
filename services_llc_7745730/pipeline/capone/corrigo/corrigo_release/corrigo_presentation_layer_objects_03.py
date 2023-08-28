@@ -1,8 +1,4 @@
 # Databricks notebook source
-Notebook for Corrigo Presentation Layer Views
-
-# COMMAND ----------
-
 # DBTITLE 1,client_variables
 import os
 from azarautils import ClientObject
@@ -248,12 +244,12 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiP
                             case when response = '1' then 'Yes' when response = '0' then 'No' else response end as response,
                             inspection_comment as comments,
                             case when upper(removed_flag) = 'TRUE' then 'Yes' else 'No' end as deleted,
-                            count (inspection_order) over (partition by work_order_id, procedure_id)  total_steps,
-                            sum(case when status_id = 3 then 1 else 0 end)  over (partition by work_order_id, procedure_id)  steps_completed,
+                            count (inspection_order) over (partition by work_order_id, procedure_id)   Procedure_Step_Count,
+                            sum(case when status_id = 3 then 1 else 0 end)  over (partition by work_order_id, procedure_id)  Steps_Completed_Count,
                             work_order_number,
                             CAST('{refresh_date}' as TIMESTAMP) as UpdateDate,
                             procedure_list_id,
-                            case when response = '1' then 'Yes' when response = '0' then 'No' else response end as response_numeric,
+                            response as response_numeric,
                             procedure_category as procedure_category
                         FROM  {var_client_custom_db}.custom_dv_inspections ; """.format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
 
@@ -454,109 +450,3 @@ spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiA
                 LEFT JOIN {var_client_custom_db}.custom_dv_areas           dv_areas
                        ON TRIM(dv_equipment.area_id)     = TRIM(dv_areas.area_id)
                 WHERE lower(dv_equipment.deleted_flag) = 'false' ) ; """.format(var_client_custom_db=var_client_custom_db))
-
-# COMMAND ----------
-
-# DBTITLE 1,ssdv_vw_Corrigo_vbiPMRMScheduling
-'''
-Version: 1, Creation Date: 08/24/2023, Created By: Varun Kancharla
-'''
-spark.sql(""" CREATE OR REPLACE VIEW {var_client_custom_db}.ssdv_vw_Corrigo_vbiPMRMScheduling
-        AS
-
-with  LAST_OCCURRENCE as 
-(
-SELECT 
-	 TENANT_ID,
-	 SCHEDULE_ID,
-	 WORK_ORDER_ID, 
-	EVENT_AT from {var_client_custom_db}.raw_schedule_events_schedevents_corrigo
-where  EVENT_AT < CURRENT_TIMESTAMP()  and   is_done='True'
-QUALIFY ROW_NUMBER() OVER(PARTITION BY TENANT_ID ,SCHEDULE_ID ORDER BY  EVENT_AT DESC ) =1
-),
-
- NEXT_OCCURRENCE as 
-(
-SELECT 
-	 TENANT_ID,
-	 SCHEDULE_ID,
-	 WORK_ORDER_ID, 
-	EVENT_AT from {var_client_custom_db}.raw_schedule_events_schedevents_corrigo
-where  EVENT_AT > CURRENT_TIMESTAMP() and   is_done='False'
-QUALIFY ROW_NUMBER() OVER(PARTITION BY TENANT_ID ,SCHEDULE_ID ORDER BY  EVENT_AT  ) =1
-)
-
-select distinct 
-    h_masterClientsTen.client_name,
-    h_masterClientsTen.client_id as company_id , 
-    schedules_schedules.schedule_id AS id,
-    schedules_schedules.name  as PMRM_Schedule_Name,
-    CASE 
-		WHEN IS_SUSPENDED='True' THEN 1 
-		ELSE 0 
-	END IS_SUSPENDED,
-    Last_Occurrence.EVENT_AT as Last_Occurrence,	
-    Next_Occurrence.EVENT_AT as  Next_Occurrence,
-    create_ahead,
-    CASE 
-		WHEN is_auto_start='True' THEN 1 
-		ELSE 0 
-	END is_auto_start,
-    schedules_schedules.type,
-    interval_type as interval,
-    frequency,
-	(CASE WHEN IS_AUTO_ASSIGN = 'True' THEN 1 WHEN IS_AUTO_ASSIGN = 'False' Then 0 ELSE 'is_auto_assign' END) AS is_auto_assign,
-	(CASE WHEN IS_AUTO_SEND = 'True' THEN 1 WHEN IS_AUTO_SEND = 'False' Then 0 ELSE 'is_auto_send' END) AS is_auto_send,
-	(CASE WHEN IS_AUTO_EQUIPMENT = 'True' THEN 1 WHEN IS_AUTO_EQUIPMENT = 'False' Then 0 ELSE 'is_auto_equipment' END) AS is_auto_equipment,
-    schedules_schedules.work_zone_number as customer,
-    contacts_contacts.contact_id,
-    contacts_contacts.contact_name,
-    FULL_NAME AS ASSIGNED_TO,
- accounts.expense_account,
-    po_number,
-    bill_to_type,
-    CASE 
-		WHEN is_pre_bill='True' THEN 1 
-		ELSE 0 
-	END is_pre_bill,
-   vendor_nte as Service_Provider_NTE  ,
-   contact_nte as customer_nte,
-    billing_rule,
-    schedules_schedules.specialty,
-    starts_on as start_date,
-		ends_on as end_date,
-split_part(Last_Occurrence.EVENT_AT,' ',2) start_time,
-schedules_schedules.priority,
-starts_on as  Season_Start,	
-Season_End,
-work_zone_number,
-last_updated_by,
-last_updated_at as last_updated,
-    CASE 
-		WHEN is_deleted='True' THEN 1 
-		ELSE 0 
-	END is_deleted,
-null contract_reference_id,
-CAST('{refresh_date}' as TIMESTAMP) as UpdateDate,
-Charge_Code,
-schedules_schedules.area_id as WorkZone_ID
-from {var_client_custom_db}.raw_schedules_schedules_corrigo schedules_schedules
-join {var_client_custom_db}.custom_hv_master_clients_tenants    h_masterClientsTen
-                  ON TRIM(schedules_schedules.source_id) = TRIM(h_masterClientsTen.source_id)
-                 AND TRIM(schedules_schedules.tenant_id) = TRIM(h_masterClientsTen.tenant_id) 
-
-left join {var_client_custom_db}.raw_contacts_contacts_corrigo contacts_contacts
-on contacts_contacts.contact_id=schedules_schedules.contact_id
-left join LAST_OCCURRENCE       LAST_OCCURRENCE 
-ON TRIM(schedules_schedules.schedule_id) =LAST_OCCURRENCE.schedule_id
-left join NEXT_OCCURRENCE       NEXT_OCCURRENCE 
-ON TRIM(schedules_schedules.schedule_id) =NEXT_OCCURRENCE.schedule_id 
-left join {var_client_custom_db}.custom_dv_service_providers  service_providers 
-on service_providers.service_provider_id=schedules_schedules.employee_id
-left join {var_client_custom_db}.raw_work_orders_workorders_corrigo workorders 
-on workorders.WORK_ORDER_ID=LAST_OCCURRENCE.WORK_ORDER_ID
-left join {var_client_custom_db}.raw_work_orders_accountspayable_corrigo  accounts 
-on accounts.hk_h_work_orders=workorders.hk_h_work_orders
-left join {var_client_custom_db}.raw_work_orders_invoices_corrigo  inv
-on workorders.hk_h_work_orders=inv.hk_h_work_orders
-""".format(var_client_custom_db=var_client_custom_db,refresh_date=refresh_date))
